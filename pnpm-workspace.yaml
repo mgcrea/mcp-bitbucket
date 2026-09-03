@@ -1,11 +1,9 @@
 allowBuilds:
   esbuild: true
 
-# Local development override.
-#
-# `dependencies` declares the real `^0.5.0`, which is what gets published. This points
-# the install at the sibling checkout until bitbucket-cli 0.5.0 is on npm — the OAuth
-# strategy and the commit/ref/source paths this server needs landed there but are not
-# released yet. Delete this block once it is published.
-overrides:
-  "@mgcrea/bitbucket-cli": "link:../../../../Developer/github/bitbucket-cli"
+# `min-release-age=1` in ~/.npmrc holds third-party publishes back for 24h. Our own
+# scope is excluded there, but pnpm 11 reads this key rather than npm's
+# `min-release-age-exclude`, so the exemption has to be repeated here. Scope-wide rather
+# than pinned to one version, which would need re-adding on every release.
+minimumReleaseAgeExclude:
+  - "@mgcrea/*"
