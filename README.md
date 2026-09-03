@@ -241,8 +241,14 @@ credential cannot see, so a missing repo and an unauthorised one look identical.
 
 ```bash
 pnpm install
-pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build
+pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build && pnpm test
 ```
+
+`test` runs twice on purpose. `test/e2e.test.ts` drives the **built** bundle over real
+stdio against a stand-in Bitbucket — it covers what an in-memory harness structurally
+cannot, namely that `dist/cli.js` starts and that `bin` points at a file that exists —
+and it skips itself when `dist/` is absent. Without a pass after `build` it would report
+green while never running.
 
 Check the built server still speaks the protocol with no credentials at all:
 

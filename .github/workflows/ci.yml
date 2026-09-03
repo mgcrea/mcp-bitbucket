@@ -44,6 +44,11 @@ jobs:
         run: pnpm run test
       - name: Build 📦
         run: pnpm run build
+      # Again, because test/e2e.test.ts drives the BUILT bundle over real stdio and
+      # skips itself when dist/ is absent. Without this pass it would silently never
+      # run in CI — a skipped test that reports as green is worse than no test.
+      - name: Test the built bundle 🧪
+        run: pnpm run test
       # The tool list is the server's public contract, and it is easy to change
       # by accident. This asserts the built CLI still speaks MCP over stdio, and
       # that an unconfigured capability is absent rather than merely refused.
