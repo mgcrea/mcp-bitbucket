@@ -1,13 +1,13 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import { createServer, type Server } from "node:http";
+import type { AddressInfo } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const BIN = join(dirname(dirname(fileURLToPath(import.meta.url))), "dist", "cli.js");
-const PORT = 8791;
 
 /**
  * Drives the BUILT bundle over real stdio against a stand-in Bitbucket.
@@ -23,6 +23,10 @@ const PORT = 8791;
  */
 describe.skipIf(!existsSync(BIN))("the built server, end to end", () => {
   let server: Server;
+  // Assigned by the kernel rather than hard-coded: a fixed port makes the suite fail on
+  // whichever developer machine happens to be running something else on it, which looks
+  // exactly like a real failure and is not one.
+  let port: number;
   let child: ChildProcessWithoutNullStreams;
   let requests: string[] = [];
   let nextId = 1;
@@ -98,7 +102,7 @@ describe.skipIf(!existsSync(BIN))("the built server, end to end", () => {
 
   beforeAll(async () => {
     server = createServer((req, res) => {
-      const url = new URL(req.url ?? "/", `http://127.0.0.1:${PORT}`);
+      const url = new URL(req.url ?? "/", `http://127.0.0.1:${port}`);
       requests.push(`${req.method} ${url.pathname}`);
       const route = routes[url.pathname];
       if (route === undefined) {
@@ -119,7 +123,8 @@ describe.skipIf(!existsSync(BIN))("the built server, end to end", () => {
       });
       res.end(JSON.stringify(body));
     });
-    await new Promise<void>((resolve) => server.listen(PORT, "127.0.0.1", resolve));
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    port = (server.address() as AddressInfo).port;
 
     child = spawn("node", [BIN], {
       env: {
@@ -128,7 +133,7 @@ describe.skipIf(!existsSync(BIN))("the built server, end to end", () => {
         HOME: "/nonexistent",
         BITBUCKET_CONFIG: "/nonexistent.json",
         BITBUCKET_HOSTS_FILE: "/nonexistent/hosts.yml",
-        BITBUCKET_API_URL: `http://127.0.0.1:${PORT}/2.0`,
+        BITBUCKET_API_URL: `http://127.0.0.1:${port}/2.0`,
         BITBUCKET_API_TOKEN: "e2e-token",
         BITBUCKET_EMAIL: "e2e@example.com",
         BITBUCKET_WORKSPACE: "acme",
