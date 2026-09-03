@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+coverage
+.idea
+.mcp.json
+
+# Credential files this server reads or writes.
+tokens.json
+hosts.yml

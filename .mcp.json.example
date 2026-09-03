@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "bitbucket": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-bitbucket/dist/cli.js"],
+      "env": {
+        "BITBUCKET_API_TOKEN": "...",
+        "BITBUCKET_EMAIL": "you@example.com",
+        "BITBUCKET_WORKSPACE": "your-workspace",
+        "BITBUCKET_ALLOW_WRITES": ""
+      }
+    }
+  }
+}
